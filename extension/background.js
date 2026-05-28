@@ -135,3 +135,10 @@ chrome.storage.local.get('signals', (result) => {
     signals = result.signals;
   }
 });
+
+// Open Team Brain dashboard on install
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    chrome.tabs.create({ url: `${COMPANION_URL}/` });
+  }
+});

@@ -1,7 +1,18 @@
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const { readJSON, writeJSON, runExtraction, BUFFER_PATH } = require('./extract');
 
 const PORT = 3847;
+const TEAM_BRAIN_DIR = path.join(__dirname, '..');
+
+const MIME_TYPES = {
+  '.html': 'text/html',
+  '.css': 'text/css',
+  '.js': 'application/javascript',
+  '.json': 'application/json',
+  '.png': 'image/png'
+};
 
 let lastExtraction = null;
 let lastCounts = { skills: 0, learnings: 0 };
@@ -69,6 +80,27 @@ const server = http.createServer(async (req, res) => {
         lastCounts
       }));
 
+    } else if (req.method === 'GET') {
+      // Serve static files (viewer + data)
+      let filePath;
+      if (req.url === '/' || req.url === '') {
+        filePath = path.join(TEAM_BRAIN_DIR, 'viewer', 'index.html');
+      } else {
+        const safePath = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+        filePath = path.join(TEAM_BRAIN_DIR, safePath);
+      }
+
+      const ext = path.extname(filePath);
+      const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+      try {
+        const content = fs.readFileSync(filePath);
+        res.writeHead(200, { ...headers, 'Content-Type': contentType });
+        res.end(content);
+      } catch {
+        res.writeHead(404, headers);
+        res.end(JSON.stringify({ error: 'Not found' }));
+      }
     } else {
       res.writeHead(404, headers);
       res.end(JSON.stringify({ error: 'Not found' }));

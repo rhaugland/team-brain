@@ -242,8 +242,8 @@
     async function loadData() {
       try {
         const [skillsRes, learningsRes] = await Promise.all([
-          fetch('../data/skills.json').then(r => r.json()).catch(() => []),
-          fetch('../data/learnings.json').then(r => r.json()).catch(() => [])
+          fetch('/data/skills.json').then(r => r.json()).catch(() => []),
+          fetch('/data/learnings.json').then(r => r.json()).catch(() => [])
         ]);
         skillsData = skillsRes;
         learningsData = learningsRes;

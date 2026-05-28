@@ -12,5 +12,26 @@
     "project": "Slushie",
     "date": "2026-05-28",
     "source": "Managed complex schema evolution across environments"
+  },
+  {
+    "person": "Ryan",
+    "skill": "Claude Code custom skills authoring",
+    "project": "Team Brain",
+    "date": "2026-05-28",
+    "source": "Created /extract skill with frontmatter, extraction criteria, and deduplication logic"
+  },
+  {
+    "person": "Ryan",
+    "skill": "Subagent-driven development orchestration",
+    "project": "Team Brain",
+    "date": "2026-05-28",
+    "source": "Coordinated multi-task implementation using dispatched subagents with review stages"
+  },
+  {
+    "person": "Ryan",
+    "skill": "Single-file web app architecture",
+    "project": "Team Brain",
+    "date": "2026-05-28",
+    "source": "Built a complete viewer with tabs, search, and filtering in one HTML file with inline CSS/JS"
   }
 ]

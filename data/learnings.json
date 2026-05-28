@@ -14,5 +14,21 @@
     "person": "Ryan",
     "date": "2026-05-28",
     "importance": "medium"
+  },
+  {
+    "learning": "Custom skills in ~/.claude/skills/ work when users type /skillname but cannot be invoked programmatically via the Skill tool — plan for manual invocation only",
+    "context": "Attempted to call /extract via Skill tool during Team Brain development, got 'Unknown skill' error",
+    "project": "Team Brain",
+    "person": "Ryan",
+    "date": "2026-05-28",
+    "importance": "high"
+  },
+  {
+    "learning": "For simple shared team data, JSON files in a git repo beat a database — no infra, no server, team syncs with git pull",
+    "context": "Chose JSON files over a database for Team Brain's skills and learnings storage",
+    "project": "Team Brain",
+    "person": "Ryan",
+    "date": "2026-05-28",
+    "importance": "medium"
   }
 ]
