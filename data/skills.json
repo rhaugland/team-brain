@@ -1,0 +1,16 @@
+[
+  {
+    "person": "Ryan",
+    "skill": "Next.js middleware auth patterns",
+    "project": "Slushie",
+    "date": "2026-05-28",
+    "source": "Built auth middleware for multi-tenant SaaS app"
+  },
+  {
+    "person": "Ryan",
+    "skill": "Prisma schema migrations",
+    "project": "Slushie",
+    "date": "2026-05-28",
+    "source": "Managed complex schema evolution across environments"
+  }
+]

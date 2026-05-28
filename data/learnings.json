@@ -1,0 +1,18 @@
+[
+  {
+    "learning": "PlanetScale doesn't support Prisma migrate — use db push instead",
+    "context": "Discovered during schema migration setup",
+    "project": "Slushie",
+    "person": "Ryan",
+    "date": "2026-05-28",
+    "importance": "high"
+  },
+  {
+    "learning": "Always set Next.js middleware matcher explicitly — default catches static assets and causes infinite loops",
+    "context": "Auth middleware was intercepting _next/static requests",
+    "project": "Slushie",
+    "person": "Ryan",
+    "date": "2026-05-28",
+    "importance": "medium"
+  }
+]
