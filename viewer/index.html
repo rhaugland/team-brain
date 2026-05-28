@@ -92,6 +92,12 @@
     .person-name {
       font-size: 18px;
       font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .person-subtitle {
+      font-size: 13px;
+      color: #888;
       margin-bottom: 12px;
     }
 
@@ -122,10 +128,34 @@
       color: #fff;
     }
 
-    .skill-meta {
-      font-size: 11px;
+    .project-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      border: 1px solid #e8e8ef;
+    }
+
+    .project-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .project-people {
+      font-size: 13px;
       color: #888;
-      margin-top: 2px;
+      margin-bottom: 12px;
+    }
+
+    .project-section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #a0a0b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 12px;
+      margin-bottom: 8px;
     }
 
     .learning-card {
@@ -168,6 +198,49 @@
     .importance-badge.high { background: #fde8e8; color: #e74c3c; }
     .importance-badge.medium { background: #fef3e2; color: #f39c12; }
 
+    .category-section {
+      margin-bottom: 24px;
+    }
+
+    .category-header {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #eef0ff;
+    }
+
+    .category-skill-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: #fff;
+      border: 1px solid #e8e8ef;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .category-skill-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .category-skill-people {
+      display: flex;
+      gap: 6px;
+    }
+
+    .person-badge {
+      background: #eef0ff;
+      color: #4a45b0;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
     .empty-state {
       text-align: center;
       padding: 60px 20px;
@@ -175,24 +248,6 @@
     }
 
     .hidden { display: none; }
-
-    .filter-active-banner {
-      background: #eef0ff;
-      padding: 10px 16px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      color: #4a45b0;
-    }
-
-    .clear-filter {
-      cursor: pointer;
-      font-weight: 500;
-      text-decoration: underline;
-    }
 
     .stats {
       font-size: 13px;
@@ -204,39 +259,40 @@
 <body>
   <div class="header">
     <h1>Team Brain</h1>
-    <p>Skills and learnings captured from Claude Code sessions</p>
+    <p>Skills and learnings across your team</p>
   </div>
 
   <div class="tabs">
-    <div class="tab active" data-tab="skills">Skills</div>
-    <div class="tab" data-tab="learnings">Learnings</div>
+    <div class="tab active" data-tab="individual">Individual</div>
+    <div class="tab" data-tab="project">Project</div>
+    <div class="tab" data-tab="company">Company</div>
   </div>
 
   <div class="search-bar">
-    <input type="text" id="search" placeholder="Search skills, people, or learnings...">
+    <input type="text" id="search" placeholder="Search skills, people, or projects...">
   </div>
 
   <div class="content">
-    <div id="skills-panel">
-      <div class="stats" id="skills-stats"></div>
-      <div id="skill-filter-banner" class="filter-active-banner hidden">
-        <span>Filtering by: <strong id="filter-skill-name"></strong></span>
-        <span class="clear-filter" id="clear-filter">Clear filter</span>
-      </div>
-      <div id="skills-list"></div>
+    <div id="individual-panel">
+      <div class="stats" id="individual-stats"></div>
+      <div id="individual-list"></div>
     </div>
 
-    <div id="learnings-panel" class="hidden">
-      <div class="stats" id="learnings-stats"></div>
-      <div id="learnings-list"></div>
+    <div id="project-panel" class="hidden">
+      <div class="stats" id="project-stats"></div>
+      <div id="project-list"></div>
+    </div>
+
+    <div id="company-panel" class="hidden">
+      <div class="stats" id="company-stats"></div>
+      <div id="company-list"></div>
     </div>
   </div>
 
   <script>
     let skillsData = [];
     let learningsData = [];
-    let activeTab = 'skills';
-    let activeSkillFilter = null;
+    let activeTab = 'individual';
     let searchQuery = '';
 
     async function loadData() {
@@ -250,134 +306,225 @@
         render();
       } catch (e) {
         document.querySelector('.content').innerHTML =
-          '<div class="empty-state"><p>Could not load data files. Make sure you\'re serving from the team-brain directory.</p></div>';
+          '<div class="empty-state"><p>Could not load data files.</p></div>';
       }
     }
 
-    function groupSkillsByPerson(skills) {
+    // --- Individual Tab ---
+    function renderIndividual() {
+      const container = document.getElementById('individual-list');
+      const statsEl = document.getElementById('individual-stats');
+      const query = searchQuery.toLowerCase();
+
+      let filtered = skillsData;
+      if (query) {
+        filtered = filtered.filter(s =>
+          s.skill.toLowerCase().includes(query) ||
+          s.person.toLowerCase().includes(query)
+        );
+      }
+
       const groups = {};
-      for (const entry of skills) {
-        if (!groups[entry.person]) groups[entry.person] = [];
-        groups[entry.person].push(entry);
+      for (const s of filtered) {
+        if (!groups[s.person]) groups[s.person] = [];
+        groups[s.person].push(s);
       }
       for (const person in groups) {
         groups[person].sort((a, b) => new Date(b.date) - new Date(a.date));
       }
-      return groups;
-    }
 
-    function renderSkills() {
-      const container = document.getElementById('skills-list');
-      const statsEl = document.getElementById('skills-stats');
-      const query = searchQuery.toLowerCase();
-
-      let filtered = skillsData;
-
-      if (activeSkillFilter) {
-        filtered = filtered.filter(s => s.skill.toLowerCase() === activeSkillFilter.toLowerCase());
-        document.getElementById('skill-filter-banner').classList.remove('hidden');
-        document.getElementById('filter-skill-name').textContent = activeSkillFilter;
-      } else {
-        document.getElementById('skill-filter-banner').classList.add('hidden');
-      }
-
-      if (query) {
-        filtered = filtered.filter(s =>
-          s.skill.toLowerCase().includes(query) ||
-          s.person.toLowerCase().includes(query) ||
-          s.project.toLowerCase().includes(query)
-        );
-      }
-
-      const grouped = groupSkillsByPerson(filtered);
-      const people = Object.keys(grouped).sort();
-
+      const people = Object.keys(groups).sort();
       const uniqueSkills = new Set(skillsData.map(s => s.skill.toLowerCase()));
       statsEl.textContent = `${people.length} people, ${uniqueSkills.size} unique skills`;
 
       if (people.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No skills found.</p></div>';
+        container.innerHTML = '<div class="empty-state"><p>No individuals found.</p></div>';
         return;
       }
 
-      container.innerHTML = people.map(person => `
-        <div class="person-card">
-          <div class="person-name">${person}</div>
-          <div class="skills-list">
-            ${grouped[person].map(s => `
-              <div class="skill-chip ${activeSkillFilter?.toLowerCase() === s.skill.toLowerCase() ? 'active' : ''}"
-                   onclick="filterBySkill('${s.skill.replace(/'/g, "\\'")}')">
-                ${s.skill}
-              </div>
-            `).join('')}
+      container.innerHTML = people.map(person => {
+        const projects = [...new Set(groups[person].map(s => s.project))].join(', ');
+        return `
+          <div class="person-card">
+            <div class="person-name">${person}</div>
+            <div class="person-subtitle">${groups[person].length} skills across ${projects}</div>
+            <div class="skills-list">
+              ${groups[person].map(s => `
+                <div class="skill-chip">${s.skill}</div>
+              `).join('')}
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    function renderLearnings() {
-      const container = document.getElementById('learnings-list');
-      const statsEl = document.getElementById('learnings-stats');
+    // --- Project Tab ---
+    function renderProject() {
+      const container = document.getElementById('project-list');
+      const statsEl = document.getElementById('project-stats');
       const query = searchQuery.toLowerCase();
 
-      const importanceOrder = { high: 0, medium: 1, low: 2 };
+      // Group skills by project
+      const projectSkills = {};
+      for (const s of skillsData) {
+        if (!projectSkills[s.project]) projectSkills[s.project] = [];
+        projectSkills[s.project].push(s);
+      }
 
-      let filtered = [...learningsData];
+      // Group learnings by project
+      const projectLearnings = {};
+      for (const l of learningsData) {
+        if (!projectLearnings[l.project]) projectLearnings[l.project] = [];
+        projectLearnings[l.project].push(l);
+      }
+
+      let projects = [...new Set([...Object.keys(projectSkills), ...Object.keys(projectLearnings)])].sort();
 
       if (query) {
-        filtered = filtered.filter(l =>
-          l.learning.toLowerCase().includes(query) ||
-          l.person.toLowerCase().includes(query) ||
-          l.project.toLowerCase().includes(query) ||
-          l.context.toLowerCase().includes(query)
+        projects = projects.filter(p => {
+          const skills = projectSkills[p] || [];
+          const learnings = projectLearnings[p] || [];
+          return p.toLowerCase().includes(query) ||
+            skills.some(s => s.skill.toLowerCase().includes(query) || s.person.toLowerCase().includes(query)) ||
+            learnings.some(l => l.learning.toLowerCase().includes(query));
+        });
+      }
+
+      statsEl.textContent = `${projects.length} projects`;
+
+      if (projects.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No projects found.</p></div>';
+        return;
+      }
+
+      container.innerHTML = projects.map(project => {
+        const skills = projectSkills[project] || [];
+        const learnings = projectLearnings[project] || [];
+        const people = [...new Set(skills.map(s => s.person))];
+        const importanceOrder = { high: 0, medium: 1, low: 2 };
+        learnings.sort((a, b) => (importanceOrder[a.importance] || 2) - (importanceOrder[b.importance] || 2));
+
+        return `
+          <div class="project-card">
+            <div class="project-name">${project}</div>
+            <div class="project-people">${people.join(', ') || 'No people'}</div>
+
+            ${skills.length > 0 ? `
+              <div class="project-section-label">Skills gained</div>
+              <div class="skills-list">
+                ${skills.map(s => `
+                  <div class="skill-chip" title="${s.person}">${s.skill}</div>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            ${learnings.length > 0 ? `
+              <div class="project-section-label">Learnings</div>
+              ${learnings.map(l => `
+                <div class="learning-card ${l.importance}">
+                  <div class="learning-text">${l.learning}</div>
+                  <div class="learning-meta">
+                    <span>${l.person}</span>
+                    <span>${l.date}</span>
+                    <span class="importance-badge ${l.importance}">${l.importance}</span>
+                  </div>
+                </div>
+              `).join('')}
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Company Tab ---
+    function categorizeSkill(skill) {
+      const s = skill.toLowerCase();
+      if (s.includes('next.js') || s.includes('react') || s.includes('vue') || s.includes('angular') ||
+          s.includes('svelte') || s.includes('frontend') || s.includes('tailwind') || s.includes('css') ||
+          s.includes('html') || s.includes('web app')) return 'Frontend';
+      if (s.includes('node') || s.includes('express') || s.includes('api') || s.includes('server') ||
+          s.includes('backend') || s.includes('middleware')) return 'Backend';
+      if (s.includes('prisma') || s.includes('postgres') || s.includes('mongo') || s.includes('database') ||
+          s.includes('sql') || s.includes('redis') || s.includes('migration') || s.includes('schema')) return 'Data';
+      if (s.includes('stripe') || s.includes('payment') || s.includes('billing') ||
+          s.includes('connect')) return 'Payments';
+      if (s.includes('docker') || s.includes('kubernetes') || s.includes('aws') || s.includes('deploy') ||
+          s.includes('ci') || s.includes('devops') || s.includes('infrastructure')) return 'Infrastructure';
+      if (s.includes('auth') || s.includes('security') || s.includes('oauth') ||
+          s.includes('jwt')) return 'Auth & Security';
+      if (s.includes('claude') || s.includes('ai') || s.includes('llm') || s.includes('agent') ||
+          s.includes('subagent') || s.includes('skill')) return 'AI & Agents';
+      if (s.includes('test') || s.includes('tdd') || s.includes('jest') ||
+          s.includes('playwright')) return 'Testing';
+      return 'General';
+    }
+
+    function renderCompany() {
+      const container = document.getElementById('company-list');
+      const statsEl = document.getElementById('company-stats');
+      const query = searchQuery.toLowerCase();
+
+      let filtered = skillsData;
+      if (query) {
+        filtered = filtered.filter(s =>
+          s.skill.toLowerCase().includes(query) ||
+          s.person.toLowerCase().includes(query) ||
+          categorizeSkill(s.skill).toLowerCase().includes(query)
         );
       }
 
-      filtered.sort((a, b) => {
-        const impDiff = (importanceOrder[a.importance] || 2) - (importanceOrder[b.importance] || 2);
-        if (impDiff !== 0) return impDiff;
-        return new Date(b.date) - new Date(a.date);
-      });
+      // Group by category
+      const categories = {};
+      for (const s of filtered) {
+        const cat = categorizeSkill(s.skill);
+        if (!categories[cat]) categories[cat] = {};
+        if (!categories[cat][s.skill]) categories[cat][s.skill] = [];
+        if (!categories[cat][s.skill].includes(s.person)) {
+          categories[cat][s.skill].push(s.person);
+        }
+      }
 
-      statsEl.textContent = `${filtered.length} learnings`;
+      const catNames = Object.keys(categories).sort();
+      const totalSkills = new Set(filtered.map(s => s.skill.toLowerCase())).size;
+      const totalPeople = new Set(filtered.map(s => s.person)).size;
+      statsEl.textContent = `${totalSkills} skills across ${catNames.length} categories, ${totalPeople} people`;
 
-      if (filtered.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No learnings found.</p></div>';
+      if (catNames.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No company knowledge found.</p></div>';
         return;
       }
 
-      container.innerHTML = filtered.map(l => `
-        <div class="learning-card ${l.importance}">
-          <div class="learning-text">${l.learning}</div>
-          <div class="learning-meta">
-            <span>${l.person}</span>
-            <span>${l.project}</span>
-            <span>${l.date}</span>
-            <span class="importance-badge ${l.importance}">${l.importance}</span>
-          </div>
+      container.innerHTML = catNames.map(cat => `
+        <div class="category-section">
+          <div class="category-header">${cat}</div>
+          ${Object.entries(categories[cat]).map(([skill, people]) => `
+            <div class="category-skill-row">
+              <div class="category-skill-name">${skill}</div>
+              <div class="category-skill-people">
+                ${people.map(p => `<span class="person-badge">${p}</span>`).join('')}
+              </div>
+            </div>
+          `).join('')}
         </div>
       `).join('');
     }
 
+    // --- Render ---
     function render() {
-      if (activeTab === 'skills') {
-        document.getElementById('skills-panel').classList.remove('hidden');
-        document.getElementById('learnings-panel').classList.add('hidden');
-        renderSkills();
-      } else {
-        document.getElementById('skills-panel').classList.add('hidden');
-        document.getElementById('learnings-panel').classList.remove('hidden');
-        renderLearnings();
-      }
-    }
+      document.getElementById('individual-panel').classList.add('hidden');
+      document.getElementById('project-panel').classList.add('hidden');
+      document.getElementById('company-panel').classList.add('hidden');
 
-    function filterBySkill(skill) {
-      if (activeSkillFilter?.toLowerCase() === skill.toLowerCase()) {
-        activeSkillFilter = null;
+      if (activeTab === 'individual') {
+        document.getElementById('individual-panel').classList.remove('hidden');
+        renderIndividual();
+      } else if (activeTab === 'project') {
+        document.getElementById('project-panel').classList.remove('hidden');
+        renderProject();
       } else {
-        activeSkillFilter = skill;
+        document.getElementById('company-panel').classList.remove('hidden');
+        renderCompany();
       }
-      render();
     }
 
     // Tab switching
@@ -386,7 +533,6 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         activeTab = tab.dataset.tab;
-        activeSkillFilter = null;
         render();
       });
     });
@@ -394,12 +540,6 @@
     // Search
     document.getElementById('search').addEventListener('input', (e) => {
       searchQuery = e.target.value;
-      render();
-    });
-
-    // Clear filter
-    document.getElementById('clear-filter').addEventListener('click', () => {
-      activeSkillFilter = null;
       render();
     });
 
