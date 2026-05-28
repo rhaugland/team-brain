@@ -1,0 +1,14 @@
+{
+  "name": "team-brain-companion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local companion for Team Brain Chrome extension",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test extract.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0"
+  }
+}
