@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Brain</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 24px 32px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #a0a0b8;
+      margin-top: 4px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      background: #1a1a2e;
+      padding: 0 32px;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      cursor: pointer;
+      color: #a0a0b8;
+      font-size: 14px;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab:hover { color: #fff; }
+
+    .tab.active {
+      color: #fff;
+      border-bottom-color: #6c63ff;
+    }
+
+    .search-bar {
+      padding: 20px 32px;
+      background: #fff;
+      border-bottom: 1px solid #e8e8ef;
+    }
+
+    .search-bar input {
+      width: 100%;
+      max-width: 480px;
+      padding: 10px 16px;
+      border: 1px solid #d1d1e0;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-bar input:focus {
+      border-color: #6c63ff;
+    }
+
+    .content {
+      padding: 24px 32px;
+      max-width: 960px;
+    }
+
+    .person-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      border: 1px solid #e8e8ef;
+    }
+
+    .person-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skill-chip {
+      background: #eef0ff;
+      color: #4a45b0;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .skill-chip:hover {
+      background: #6c63ff;
+      color: #fff;
+    }
+
+    .skill-chip.active {
+      background: #6c63ff;
+      color: #fff;
+    }
+
+    .skill-meta {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .learning-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      border: 1px solid #e8e8ef;
+      border-left: 4px solid #6c63ff;
+    }
+
+    .learning-card.high { border-left-color: #e74c3c; }
+    .learning-card.medium { border-left-color: #f39c12; }
+
+    .learning-text {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .learning-meta {
+      font-size: 13px;
+      color: #888;
+    }
+
+    .learning-meta span {
+      margin-right: 16px;
+    }
+
+    .importance-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .importance-badge.high { background: #fde8e8; color: #e74c3c; }
+    .importance-badge.medium { background: #fef3e2; color: #f39c12; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #888;
+    }
+
+    .hidden { display: none; }
+
+    .filter-active-banner {
+      background: #eef0ff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: #4a45b0;
+    }
+
+    .clear-filter {
+      cursor: pointer;
+      font-weight: 500;
+      text-decoration: underline;
+    }
+
+    .stats {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Team Brain</h1>
+    <p>Skills and learnings captured from Claude Code sessions</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="skills">Skills</div>
+    <div class="tab" data-tab="learnings">Learnings</div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search skills, people, or learnings...">
+  </div>
+
+  <div class="content">
+    <div id="skills-panel">
+      <div class="stats" id="skills-stats"></div>
+      <div id="skill-filter-banner" class="filter-active-banner hidden">
+        <span>Filtering by: <strong id="filter-skill-name"></strong></span>
+        <span class="clear-filter" id="clear-filter">Clear filter</span>
+      </div>
+      <div id="skills-list"></div>
+    </div>
+
+    <div id="learnings-panel" class="hidden">
+      <div class="stats" id="learnings-stats"></div>
+      <div id="learnings-list"></div>
+    </div>
+  </div>
+
+  <script>
+    let skillsData = [];
+    let learningsData = [];
+    let activeTab = 'skills';
+    let activeSkillFilter = null;
+    let searchQuery = '';
+
+    async function loadData() {
+      try {
+        const [skillsRes, learningsRes] = await Promise.all([
+          fetch('../data/skills.json').then(r => r.json()).catch(() => []),
+          fetch('../data/learnings.json').then(r => r.json()).catch(() => [])
+        ]);
+        skillsData = skillsRes;
+        learningsData = learningsRes;
+        render();
+      } catch (e) {
+        document.querySelector('.content').innerHTML =
+          '<div class="empty-state"><p>Could not load data files. Make sure you\'re serving from the team-brain directory.</p></div>';
+      }
+    }
+
+    function groupSkillsByPerson(skills) {
+      const groups = {};
+      for (const entry of skills) {
+        if (!groups[entry.person]) groups[entry.person] = [];
+        groups[entry.person].push(entry);
+      }
+      for (const person in groups) {
+        groups[person].sort((a, b) => new Date(b.date) - new Date(a.date));
+      }
+      return groups;
+    }
+
+    function renderSkills() {
+      const container = document.getElementById('skills-list');
+      const statsEl = document.getElementById('skills-stats');
+      const query = searchQuery.toLowerCase();
+
+      let filtered = skillsData;
+
+      if (activeSkillFilter) {
+        filtered = filtered.filter(s => s.skill.toLowerCase() === activeSkillFilter.toLowerCase());
+        document.getElementById('skill-filter-banner').classList.remove('hidden');
+        document.getElementById('filter-skill-name').textContent = activeSkillFilter;
+      } else {
+        document.getElementById('skill-filter-banner').classList.add('hidden');
+      }
+
+      if (query) {
+        filtered = filtered.filter(s =>
+          s.skill.toLowerCase().includes(query) ||
+          s.person.toLowerCase().includes(query) ||
+          s.project.toLowerCase().includes(query)
+        );
+      }
+
+      const grouped = groupSkillsByPerson(filtered);
+      const people = Object.keys(grouped).sort();
+
+      const uniqueSkills = new Set(skillsData.map(s => s.skill.toLowerCase()));
+      statsEl.textContent = `${people.length} people, ${uniqueSkills.size} unique skills`;
+
+      if (people.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No skills found.</p></div>';
+        return;
+      }
+
+      container.innerHTML = people.map(person => `
+        <div class="person-card">
+          <div class="person-name">${person}</div>
+          <div class="skills-list">
+            ${grouped[person].map(s => `
+              <div class="skill-chip ${activeSkillFilter?.toLowerCase() === s.skill.toLowerCase() ? 'active' : ''}"
+                   onclick="filterBySkill('${s.skill.replace(/'/g, "\\'")}')">
+                ${s.skill}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderLearnings() {
+      const container = document.getElementById('learnings-list');
+      const statsEl = document.getElementById('learnings-stats');
+      const query = searchQuery.toLowerCase();
+
+      const importanceOrder = { high: 0, medium: 1, low: 2 };
+
+      let filtered = [...learningsData];
+
+      if (query) {
+        filtered = filtered.filter(l =>
+          l.learning.toLowerCase().includes(query) ||
+          l.person.toLowerCase().includes(query) ||
+          l.project.toLowerCase().includes(query) ||
+          l.context.toLowerCase().includes(query)
+        );
+      }
+
+      filtered.sort((a, b) => {
+        const impDiff = (importanceOrder[a.importance] || 2) - (importanceOrder[b.importance] || 2);
+        if (impDiff !== 0) return impDiff;
+        return new Date(b.date) - new Date(a.date);
+      });
+
+      statsEl.textContent = `${filtered.length} learnings`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No learnings found.</p></div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(l => `
+        <div class="learning-card ${l.importance}">
+          <div class="learning-text">${l.learning}</div>
+          <div class="learning-meta">
+            <span>${l.person}</span>
+            <span>${l.project}</span>
+            <span>${l.date}</span>
+            <span class="importance-badge ${l.importance}">${l.importance}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function render() {
+      if (activeTab === 'skills') {
+        document.getElementById('skills-panel').classList.remove('hidden');
+        document.getElementById('learnings-panel').classList.add('hidden');
+        renderSkills();
+      } else {
+        document.getElementById('skills-panel').classList.add('hidden');
+        document.getElementById('learnings-panel').classList.remove('hidden');
+        renderLearnings();
+      }
+    }
+
+    function filterBySkill(skill) {
+      if (activeSkillFilter?.toLowerCase() === skill.toLowerCase()) {
+        activeSkillFilter = null;
+      } else {
+        activeSkillFilter = skill;
+      }
+      render();
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeTab = tab.dataset.tab;
+        activeSkillFilter = null;
+        render();
+      });
+    });
+
+    // Search
+    document.getElementById('search').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      render();
+    });
+
+    // Clear filter
+    document.getElementById('clear-filter').addEventListener('click', () => {
+      activeSkillFilter = null;
+      render();
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
